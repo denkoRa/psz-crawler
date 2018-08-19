@@ -6,7 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+import mysql.connector
+from scrapy.exceptions import IgnoreRequest
 
 class DiscogsSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -66,6 +67,19 @@ class DiscogsDownloaderMiddleware(object):
         # This method is used by Scrapy to create your spiders.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="psz",
+            password="123",
+            database='discogs',
+            auth_plugin='mysql_native_password'
+        )
+        cursor = mydb.cursor()
+        cursor.execute("SELECT idalbum FROM album")
+        ids = cursor.fetchall()
+        s.seen_ids = []
+        for i in ids:
+            s.seen_ids.append(i[0])
         return s
 
     def process_request(self, request, spider):
@@ -87,7 +101,14 @@ class DiscogsDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
-        return response
+        try:
+            album_id = int(response.url.split('/')[-1])
+        except ValueError:
+            album_id = None
+        if album_id in self.seen_ids:
+            raise IgnoreRequest("Already seen album id %s" % album_id)
+        else:
+            return response
 
     def process_exception(self, request, exception, spider):
         # Called when a download handler or a process_request()

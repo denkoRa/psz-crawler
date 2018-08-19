@@ -14,6 +14,7 @@ BOT_NAME = 'discogs'
 SPIDER_MODULES = ['discogs.spiders']
 NEWSPIDER_MODULE = 'discogs.spiders'
 
+DATABASE = "discogs"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'discogs (+http://www.yourdomain.com)'
@@ -66,9 +67,9 @@ DOWNLOAD_DELAY = 1
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'discogs.pipelines.DiscogsPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'discogs.pipelines.DiscogsPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -97,6 +98,7 @@ RETRY_TIMES = 10
 RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408]
 
 DOWNLOADER_MIDDLEWARES = {
+    'discogs.middlewares.DiscogsDownloaderMiddleware': 543,
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
     'scrapy_proxies.RandomProxy': 100,
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,

@@ -1,0 +1,10 @@
+insert_album = "INSERT INTO album(idalbum, title, release_count, idartist, year, track_count, avg_rating) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+insert_artist = "INSERT INTO artist(idartist, name) VALUES (%s, %s)"
+insert_track = "INSERT INTO track(idtrack, title, duration) VALUES (%s, %s, %s)"
+insert_collection_track = "INSERT INTO collection_track(idcollection, idtrack) VALUES (%s, %s)"
+insert_collection_genre = "INSERT INTO collection_genre(idcollection, name) VALUES (%s, %s)"
+insert_collection_style = "INSERT INTO collection_genre(idcollection, name) VALUES (%s, %s)"
+insert_genre = "INSERT INTO genre(name) VALUES (%(name)s)"
+insert_style = "INSERT INTO style(name) VALUES (%(name)s)"
+insert_album_release = "INSERT INTO album_release(idalbum, idrelease) VALUES (%s, %s)"
+
