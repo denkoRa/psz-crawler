@@ -99,9 +99,9 @@ RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408]
 
 DOWNLOADER_MIDDLEWARES = {
     'discogs.middlewares.DiscogsDownloaderMiddleware': 543,
-    'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
-    'scrapy_proxies.RandomProxy': 100,
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+    # 'scrapy.downloadermiddlewares.retry.RetryMiddleware': 90,
+    # 'scrapy_proxies.RandomProxy': 100,
+    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
     #'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
     #'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400
 }

@@ -9,12 +9,5 @@ mydb = mysql.connector.connect(
 )
 
 mycursor = mydb.cursor()
-# mycursor.execute("SELECT * FROM style")
-# res = mycursor.fetchall()
-# print(res)
-style = 'Folk, World, & Country'
-val = {"name": style }
-insert_style = "INSERT INTO style(name) VALUES (%(name)s)"
-mycursor.execute(insert_style, val)
-mydb.commit()
-print(mycursor.rowcount, "records inserted")
+mycursor.execute("SELECT idrelease FROM discogs.release")
+print(len(mycursor.fetchall()))

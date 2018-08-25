@@ -65,6 +65,9 @@ class DiscogsDownloaderMiddleware(object):
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
+        """
+        Gets releases already present in database
+        """
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         mydb = mysql.connector.connect(
@@ -75,11 +78,11 @@ class DiscogsDownloaderMiddleware(object):
             auth_plugin='mysql_native_password'
         )
         cursor = mydb.cursor()
-        cursor.execute("SELECT idalbum FROM album")
+        cursor.execute("SELECT idrelease FROM discogs.release")
         ids = cursor.fetchall()
-        s.seen_ids = []
+        s.seen_ids = set()
         for i in ids:
-            s.seen_ids.append(i[0])
+            s.seen_ids.add(i[0])
         return s
 
     def process_request(self, request, spider):
@@ -101,6 +104,9 @@ class DiscogsDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+        """
+        Ignore the releases which are present in DB
+        """
         try:
             album_id = int(response.url.split('/')[-1])
         except ValueError:
