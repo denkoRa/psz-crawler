@@ -33,7 +33,7 @@ def main():
     plot(go.Figure(
         data=data, 
         layout=layout), 
-        filename='a.html'
+        filename='charts/a.html'
     )
 
     results = select(_TOP_6_GENRES)
@@ -51,7 +51,7 @@ def main():
     plot(go.Figure(
         data=data, 
         layout=layout), 
-        filename='b.html'
+        filename='charts/b.html'
     )
 
     _90 = select(_TRACKS_PER_DURATION.format(0, 90))
@@ -74,7 +74,7 @@ def main():
     plot(go.Figure(
         data=data,
         layout=layout), 
-        filename='c.html'
+        filename='charts/c.html'
     )
 
     cyrillic = select(_FIND_CYRILLIC_ALBUMS)
@@ -95,7 +95,7 @@ def main():
     plot(go.Figure(
         data=data,
         layout=layout),
-        filename='d.html'
+        filename='charts/d.html'
     )
 
     results = select(_ALBUMS_PER_GENRE_CNT)
@@ -113,7 +113,7 @@ def main():
     plot(go.Figure(
         data=data,
         layout=layout),
-        filename='e.html'
+        filename='charts/e.html'
     )
 
 if __name__ == "__main__":
