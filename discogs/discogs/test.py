@@ -9,5 +9,7 @@ mydb = mysql.connector.connect(
 )
 
 mycursor = mydb.cursor()
-mycursor.execute("SELECT idrelease FROM discogs.release")
-print(len(mycursor.fetchall()))
+mycursor.execute("SELECT name FROM genre")
+#print(mycursor.fetchall())
+for res in mycursor.fetchall():
+    print (res)
