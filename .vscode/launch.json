@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "args": [
-                "15",  "-t", "-r"
+                "15", "5000", "-t", "-y", "-g"
             ]
         },
         {

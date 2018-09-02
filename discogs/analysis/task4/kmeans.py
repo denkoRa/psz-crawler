@@ -130,7 +130,7 @@ def main(args):
     labels = kmeans.labels_
 
     colors = [list(np.random.choice(range(30, 220), size=3)) for k in range(args.k)]
-    indices = sample(range(len(albums)), 2000)
+    indices = sample(range(len(albums)), args.n)
 
     #2D projektovanje
     pca2d = PCA(n_components=2)
@@ -151,12 +151,15 @@ def main(args):
                 ),
                 x=[d['points'][0] for d in clustered_data[k]],
                 y=[d['points'][1] for d in clustered_data[k]],
-                text=["{}-{}[year={}/rating={}/tracks={}]word_features={}".  
+                text=["({}-{})[year={}/rating={}/tracks={}][word_features={}]".  
                     format(albums[d['idx']]['title'], albums[d['idx']]['artist'], albums[d['idx']]['year'], albums[d['idx']]['rating'], albums[d['idx']]['tracks'], albums[d['idx']]['word_features']) for d in clustered_data[k]]
             )
         )
     layout = go.Layout(
-        title="K means 2d projection for {} clusters".format(args.k)
+        title="K means 2d projection for {} clusters".format(args.k),
+        xaxis=dict(
+            title="Genre={} Style={} Format={} Rating={} Year={} Tracks={}".format(args.genre, args.style, args.format, args.rating, args.year, args.tracks)
+        )
     )
     plot(go.Figure(data=plot_data, layout=layout), filename="charts/clusters2d.html")
 
@@ -164,6 +167,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("k", help="number of clusters", type=int)
+    parser.add_argument("n", help="number of samples on graph", type=int)
     parser.add_argument("-g", "--genre", help="use genre", action="store_true")
     parser.add_argument("-s", "--style", help="use style", action="store_true")
     parser.add_argument("-f", "--format", help="use format", action="store_true")
