@@ -4,7 +4,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import Normalizer, StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from queries4 import _GET_ALBUMS, _GET_ALBUMS_GENRES, _GET_ALBUMS_STYLES, _GET_ALL_GENRES, _GET_ALL_STYLES
+from queries4 import _GET_ALBUMS, _GET_ALBUMS_GENRES, _GET_ALBUMS_STYLES, \
+                    _GET_ALL_GENRES, _GET_ALL_STYLES, _GET_ALL_FORMATS, _GET_ALBUMS_FORMAT
 import numpy as np
 from plotly.offline import plot
 import plotly.graph_objs as go
@@ -28,7 +29,7 @@ def get_albums_dict():
     results = select(_GET_ALBUMS)
     albums = {}
     for res in results:
-        albums[res[0]] = {'title': res[1], 'artist': res[2], 'year': res[3], 'rating': res[4], 'word_features': []}
+        albums[res[0]] = {'title': res[1], 'artist': res[2], 'year': res[3], 'rating': res[4], 'tracks': res[5], 'word_features': []}
     return albums
 
 
@@ -49,8 +50,16 @@ def add_style_word_features(albums, s):
         if ast[0] in albums:
             albums[ast[0]]['word_features'].append(ast[1])
 
+def add_format_word_features(albums, f):
+    if not f:
+        return
+    album_format = select(_GET_ALBUMS_FORMAT)
+    for af in album_format:
+        if af[0] in albums:
+            albums[af[0]]['word_features'].append(af[1])
 
-def get_vocabulary(g, s):
+
+def get_vocabulary(g, s, f):
     v = []
     if g:
         results = select(_GET_ALL_GENRES)
@@ -58,6 +67,10 @@ def get_vocabulary(g, s):
             v.append(res[0])
     if s:
         results = select(_GET_ALL_STYLES)
+        for res in results:
+            v.append(res[0])
+    if f:
+        results = select(_GET_ALL_FORMATS)
         for res in results:
             v.append(res[0])
     return v
@@ -68,21 +81,22 @@ def add_single_feature_vector(data, col, feature, albums):
     null_year_indexes = np.where(np.isnan(f_list))
     f_list[null_year_indexes] = np.nanmean(f_list)
     vector = StandardScaler().fit_transform(f_list)
+    print(vector.shape)
     data[:, col] = vector[:, 0]
 
 
 def main(args):
     albums = get_albums_dict()
     j = 0
-     
-    if args.genre or args.style:
+    bag_of_words = args.genre or args.style or args.format
+    if bag_of_words:
         add_genre_word_features(albums, args.genre)
         add_style_word_features(albums, args.style)
+        add_format_word_features(albums, args.format)
         for key in albums:
             albums[key]['word_features'] = " ".join(albums[key]['word_features'])
-
         albums = list(albums.values())
-        vocab = get_vocabulary(args.genre, args.style)
+        vocab = get_vocabulary(args.genre, args.style, args.format)
         count_vectorizer = CountVectorizer()
         count_vectorizer.fit(vocab)
         samples = [album['word_features'] for album in albums]
@@ -94,7 +108,7 @@ def main(args):
         extracted_word_data = None
         extra_f = 0
     
-    data = np.zeros((len(albums), args.year + args.rating + extra_f))
+    data = np.zeros((len(albums), args.year + args.rating + args.tracks + extra_f))
 
     if extracted_word_data is not None:
         data[:, :extracted_word_data.shape[1]] = extracted_word_data
@@ -106,13 +120,17 @@ def main(args):
 
     if args.rating:
         add_single_feature_vector(data, j, 'rating', albums)
+        j = j + 1
 
+    if args.tracks:
+        add_single_feature_vector(data, j, 'tracks', albums)
+        
     kmeans = KMeans(n_clusters=args.k, n_init=5, verbose=1, tol=1e-5).fit(data)
 
     labels = kmeans.labels_
 
     colors = [list(np.random.choice(range(30, 220), size=3)) for k in range(args.k)]
-    indices = sample(range(len(albums)), 500)
+    indices = sample(range(len(albums)), 2000)
 
     #2D projektovanje
     pca2d = PCA(n_components=2)
@@ -133,8 +151,8 @@ def main(args):
                 ),
                 x=[d['points'][0] for d in clustered_data[k]],
                 y=[d['points'][1] for d in clustered_data[k]],
-                text=["{}-{}\nreleased={} rating={}\nword_features={}".  
-                    format(albums[d['idx']]['title'], albums[d['idx']]['artist'], albums[d['idx']]['year'], albums[d['idx']]['rating'], albums[d['idx']]['word_features']) for d in clustered_data[k]]
+                text=["{}-{}[year={}/rating={}/tracks={}]word_features={}".  
+                    format(albums[d['idx']]['title'], albums[d['idx']]['artist'], albums[d['idx']]['year'], albums[d['idx']]['rating'], albums[d['idx']]['tracks'], albums[d['idx']]['word_features']) for d in clustered_data[k]]
             )
         )
     layout = go.Layout(
@@ -148,7 +166,9 @@ if __name__ == "__main__":
     parser.add_argument("k", help="number of clusters", type=int)
     parser.add_argument("-g", "--genre", help="use genre", action="store_true")
     parser.add_argument("-s", "--style", help="use style", action="store_true")
+    parser.add_argument("-f", "--format", help="use format", action="store_true")
     parser.add_argument("-r", "--rating", help="use rating", action="store_true")
     parser.add_argument("-y", "--year", help="use year", action="store_true")
+    parser.add_argument("-t", "--tracks", help="use track count", action="store_true")
     args = parser.parse_args()
     main(args)
